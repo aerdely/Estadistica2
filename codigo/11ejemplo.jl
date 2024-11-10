@@ -1,13 +1,12 @@
 ### Regresión lineal simple bajo normalidad
 ### Autor: Dr. Arturo Erdely
-### Versión: 2024-11-03
+### Versión: 2024-11-09
 
 
 # Cargar paquetes necesarios:
 
 using Random # no requiere instalación previa
 using Distributions, Plots, LaTeXStrings # previamente instalados
-
 
 
 # Simular muestra condicionada a partir del modelo Yx = α + βx + ε
@@ -40,7 +39,7 @@ end
 
 # Estimación de σ²
 begin
-    e = y - g.(x) 
+    e = y - g.(x) # residuos
     s2 = var(e)
     q975 = quantile(Normal(0,1), 0.975)
     plot!(x, g.(x) .+ q975*√s2, color = :violet, label = "")
@@ -56,7 +55,7 @@ begin
     sumstat(x,y) = [sum(y), sum(x .* y), sum(y .^ 2)] # summary statistic
     obstat = sumstat(x, y) # valor observado del summary statistic
     δ(u, v) = √sum((u - v) .^2) # distancia euclidiana
-    dist = zeros(m) # inicializar vector de distinacias
+    dist = zeros(m) # inicializar vector de distancias
     aa = rand(Uniform(a - 2*abs(a), a + 2*abs(a)), m) # simular a priori 
     bb = rand(Uniform(b - 2*abs(b), b + 2*abs(b)), m) # simular a priori 
     ss = rand(Uniform(0, 2*s2), m) # simular a priori 
@@ -72,6 +71,7 @@ end;
 
 
 # Gráficas de parámetros a posteriori
+
 begin
     αest = median(αpost)
     βest = median(βpost)
@@ -82,21 +82,27 @@ begin
     )
     vline!([α], label = "valor teórico", color = :blue, lw = 3)
     αgraf = vline!([αest], label = "mediana a posteriori", color = :red, lw = 3)
+end
 
+begin
     histogram(βpost, normalize = true, color = :lightgreen,
               label = "simulaciones a posteriori",
               xlabel = "β", ylabel = "densidad a posteriori"
     )
     vline!([β], label = "valor teórico", color = :blue, lw = 3)
     βgraf = vline!([βest], label = "mediana a posteriori", color = :red, lw = 3)
+end
 
+begin
     histogram(σ2post, normalize = true, color = :pink,
               label = "simulaciones a posteriori",
               xlabel = L"\sigma^2", ylabel = "densidad a posteriori"
     )
     vline!([σ2], label = "valor teórico", color = :blue, lw = 3)
     σ2graf = vline!([σ2est], label = "mediana a posteriori", color = :red, lw = 3)
+end
 
+begin
     scatter(αpost, βpost, label = "simulaciones a posteriori", xlabel = "α", ylabel = "β", mc = :yellow)
     scatter!([α], [β], label = "valor teórico", mc = :blue, ms = 5)
     plot!([minimum(αpost), α], [β, β], label = "", color = :blue)
@@ -104,6 +110,6 @@ begin
     scatter!([αest], [βest], label = "mediana a posteriori", mc = :red, ms = 5)
     plot!([minimum(αpost), αest], [βest, βest], label = "", color = :red)
     αβgraf = plot!([αest, αest], [minimum(βpost), βest], label = "", color = :red)
+end 
 
-    plot(βgraf, αβgraf, σ2graf, αgraf, layout = (2,2), size = (1000,800))
-end
+plot(βgraf, αβgraf, σ2graf, αgraf, layout = (2,2), size = (1000,800))
